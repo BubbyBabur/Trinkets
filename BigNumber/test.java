@@ -14,6 +14,9 @@ public class test {
 
         out.println(a);
 
+        String b = a + "";
+        System.out.println(b.length());
+
         out.close();
     }
 }
