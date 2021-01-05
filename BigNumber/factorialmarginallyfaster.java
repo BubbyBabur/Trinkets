@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class factorialmarginallyfaster {
 
@@ -40,63 +39,46 @@ public class factorialmarginallyfaster {
     public static void main(String[] args) throws IOException {
 
         int target = 100000;
-        int times = 10;
         boolean milestones = false;
 
-        PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("factorials/" + target + ".txt")));
+        PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("./data/out.txt")));
 
-        long[] performance = new long[times];
+        BigInteger factorial = new BigInteger("1");
 
-        // BigInteger factorial = new BigInteger("1");
+        final long startTime = System.currentTimeMillis();
 
-        for(int i = 0; i < times; i++) {
+        int[] primes = primes(target);
 
-            final long startTime = System.currentTimeMillis();
+        int milestone = 1;
 
-            int[] primes = primes(target);
+        for(int prime : primes) {
+            int number = 0;
 
-            BigInteger factorial = new BigInteger("1");
-
-            int milestone = 1;
-
-            for(int prime : primes) {
-                int number = 0;
-
-                long curr = prime;
-                while(curr < target) {
-                    number += target / (int) curr;
-                    curr *= prime;
-                }
-
-                BigInteger currpower = BigInteger.valueOf((long) prime);
-                currpower = currpower.pow(number);
-
-                factorial = factorial.multiply(currpower);
-
-                if(milestones && prime > milestone) {
-                    milestone *= 10;
-                    System.out.println(prime);
-                }
-
+            long curr = prime;
+            while(curr < target) {
+                number += target / (int) curr;
+                curr *= prime;
             }
 
-            final long endTime = System.currentTimeMillis();
-            System.out.println("Attempt " + (i + 1) + "; Total execution time: " + (endTime - startTime));
+            BigInteger currpower = BigInteger.valueOf((long) prime);
+            currpower = currpower.pow(number);
 
-            performance[i] = endTime - startTime;
+            factorial = factorial.multiply(currpower);
+
+            if(milestones && prime > milestone) {
+                milestone *= 10;
+                System.out.println(prime);
+            }
+
         }
-        // out.println(factorial);
+
+        final long endTime = System.currentTimeMillis();
+        System.out.println("Total execution time: " + (endTime - startTime));
+
+        // long performance = endTime - startTime;
+        
+        out.println(factorial);
+        // out.println(performance);
         out.close();
-
-        PrintWriter performanceout = new PrintWriter(new BufferedWriter(new FileWriter("factorials/" + target + "performance.txt")));
-        long average = 0;
-        for(long time : performance) {
-            average += time;
-        }
-        average /= times;
-
-        performanceout.println(Arrays.toString(performance));
-        performanceout.println(average);
-        performanceout.close();
     }
 }
