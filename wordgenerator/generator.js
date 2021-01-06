@@ -4,7 +4,7 @@
 // Number of words generated, but many might be duplicates
 const number = 1_000_000;
 // Prefix, like "rog" or "kevin", all lowercase, its length must be more than or equal to combolength
-const prefix = "kev";
+const prefix = "rog";
 // Or you can generate purely organic words without a prefix
 const generateWithoutPrefix = false;
 // I use a markov chain, so this is a variable for the combo length
@@ -17,7 +17,6 @@ const minlength = 5;
 // Log in console when running
 const logmilestones = true;
 const milestonemark = 100_000;
-
 
 // This is literally just a markov chain but with characters. It iterates through all the words in dictionary and generates words.
 
@@ -46,33 +45,40 @@ const start = new Map();
 
 // Total start combinations
 start.total = function() {
+
     let total = 0;
     for (const key of this.keys()) {
         total += this.get(key);
     }
+    this.cache = total;
     return total;
+
+}
+
+start.prepare = function() {
+    this.weightedlist = new Array(this.total());
+
+    let index = 0;
+    for (const key of this.keys()) {
+        let nextindex = index + this.get(key);
+        for(; index < nextindex; index++) {
+            this.weightedlist[index] = key;
+        }
+    }
 }
 
 // A weighted random of first combos to start off organic words
 start.weightedrandom = function() {
-    let curr = this.total() * Math.random();
-    for (const key of this.keys()) {
-        curr -= this.get(key);
-        if(curr <= 0) {
-            return key;
-        }
-    }
-}
+    // let curr = this.total() * Math.random();
+    // for (const key of this.keys()) {
+    //     curr -= this.get(key);
+    //     if(curr <= 0) {
+    //         return key;
+    //     }
+    // }
 
-// A random randdom of first combos
-start.random = function() {
-    let curr = this.size * Math.random();
-    for (const key of this.keys()) {
-        curr --;
-        if (curr <= 0) {
-            return key;
-        }
-    }
+    let index = Math.floor(Math.random() * this.weightedlist.length);
+    return this.weightedlist[index];
 }
 
 /**
@@ -192,8 +198,10 @@ for(const word of words) {
     }
 }
 
+start.prepare();
+
 /*
-// For analyzing data/chzracter combos, which might be fun in the future
+// For analyzing data/character combos, which might be fun in the future
 const data = Object.create(null);
 for(const combo of markov.keys()) {
     data[combo] = markov.get(combo).toObj();
@@ -258,4 +266,4 @@ const wordlist = [...generated];
 wordlist.sort((a,b) => a.length - b.length);
 
 // Use fs to write file
-fs.writeFileSync(`./data/${prefix}x${wordlist.length}.txt`,wordlist.join('\n'));
+fs.writeFileSync(`./data/${generateWithoutPrefix ? `organic` : prefix}x${wordlist.length}.txt`,wordlist.join('\n'));
